@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/jouiwnl/go-crud/controllers"
 	"github.com/jouiwnl/go-crud/initializers"
+	"github.com/jouiwnl/go-crud/routes"
 )
 
 func init() {
@@ -20,10 +20,7 @@ func init() {
 }
 
 func main() {
-
 	r := gin.Default()
-	r.GET("/users/:id", controllers.GetUser)
-	r.GET("/users", controllers.GetUSers)
-
-	r.Run() // listen and serve on 0.0.0.0:8080
+	routes.GetRoutes(r)
+	r.Run()
 }
