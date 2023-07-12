@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/jouiwnl/simple-go-api/internal/config/database/sqlc"
-	"github.com/jouiwnl/simple-go-api/internal/user/repository"
+	"github.com/jouiwnl/simple-go-api/internal/factory"
 	userUseCases "github.com/jouiwnl/simple-go-api/internal/user/usecases"
 	_ "github.com/lib/pq"
 	"log"
@@ -31,10 +31,10 @@ func main() {
 		panic(err.Error())
 	}
 
-	queries := sqlc.New(dbcon)
+	queries := *sqlc.New(dbcon)
 	ctx := context.Background()
 
-	repositoryFactory := repository.NewRepositoryFactory(dbcon, *queries, ctx)
+	repositoryFactory := factory.NewRepositoryFactory(dbcon, queries, ctx)
 
 	userRepository := repositoryFactory.NewUserRepository()
 
