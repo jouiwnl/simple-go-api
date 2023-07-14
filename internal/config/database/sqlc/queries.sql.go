@@ -10,6 +10,17 @@ import (
 	"database/sql"
 )
 
+const CountUsers = `-- name: CountUsers :one
+SELECT count(*) FROM users
+`
+
+func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
+	row := q.queryRow(ctx, q.countUsersStmt, CountUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const CreateUser = `-- name: CreateUser :exec
 insert into users(id, name, email, cpf, created_at) values ($1, $2, $3, $4, $5)
 `
@@ -30,6 +41,15 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 		arg.Cpf,
 		arg.CreatedAt,
 	)
+	return err
+}
+
+const DeleteUser = `-- name: DeleteUser :exec
+delete from users where id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.deleteUserStmt, DeleteUser, id)
 	return err
 }
 

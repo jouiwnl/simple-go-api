@@ -12,6 +12,13 @@ func WriteInternalErrorResponse(ginCtx *gin.Context, error string) {
 	})
 }
 
+func WriteNotFoundErrorResponse(ginCtx *gin.Context) {
+	ginCtx.JSON(404, gin.H{
+		"message": "Not found",
+		"error":   "Not found",
+	})
+}
+
 func NullSafeString(original *string) string {
 	if original == nil {
 		return ""

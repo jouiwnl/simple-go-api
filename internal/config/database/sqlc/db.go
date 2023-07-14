@@ -24,8 +24,14 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
+	if q.countUsersStmt, err = db.PrepareContext(ctx, CountUsers); err != nil {
+		return nil, fmt.Errorf("error preparing query CountUsers: %w", err)
+	}
 	if q.createUserStmt, err = db.PrepareContext(ctx, CreateUser); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
+	}
+	if q.deleteUserStmt, err = db.PrepareContext(ctx, DeleteUser); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteUser: %w", err)
 	}
 	if q.existsUserByCpfStmt, err = db.PrepareContext(ctx, ExistsUserByCpf); err != nil {
 		return nil, fmt.Errorf("error preparing query ExistsUserByCpf: %w", err)
@@ -50,9 +56,19 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
+	if q.countUsersStmt != nil {
+		if cerr := q.countUsersStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing countUsersStmt: %w", cerr)
+		}
+	}
 	if q.createUserStmt != nil {
 		if cerr := q.createUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
+		}
+	}
+	if q.deleteUserStmt != nil {
+		if cerr := q.deleteUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteUserStmt: %w", cerr)
 		}
 	}
 	if q.existsUserByCpfStmt != nil {
@@ -124,7 +140,9 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                    DBTX
 	tx                    *sql.Tx
+	countUsersStmt        *sql.Stmt
 	createUserStmt        *sql.Stmt
+	deleteUserStmt        *sql.Stmt
 	existsUserByCpfStmt   *sql.Stmt
 	existsUserByEmailStmt *sql.Stmt
 	getPaginatedUsersStmt *sql.Stmt
@@ -137,7 +155,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                    tx,
 		tx:                    tx,
+		countUsersStmt:        q.countUsersStmt,
 		createUserStmt:        q.createUserStmt,
+		deleteUserStmt:        q.deleteUserStmt,
 		existsUserByCpfStmt:   q.existsUserByCpfStmt,
 		existsUserByEmailStmt: q.existsUserByEmailStmt,
 		getPaginatedUsersStmt: q.getPaginatedUsersStmt,

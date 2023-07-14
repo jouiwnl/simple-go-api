@@ -19,7 +19,7 @@ func NewCreateUserUseCase(userRepository *repository.UserRepository) *CreateUser
 	}
 }
 
-func (u *CreateUserUseCase) CreateUser(c *gin.Context) {
+func (u *CreateUserUseCase) Execute(c *gin.Context) {
 	user := &dto.UserDto{}
 	err := c.ShouldBind(&user)
 

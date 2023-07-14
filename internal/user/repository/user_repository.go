@@ -3,12 +3,13 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jouiwnl/simple-go-api/internal/application/commons"
 	"github.com/jouiwnl/simple-go-api/internal/application/utils"
 	"github.com/jouiwnl/simple-go-api/internal/config/database/sqlc"
 	"github.com/jouiwnl/simple-go-api/internal/user/dto"
-	"time"
 )
 
 type UserRepository struct {
@@ -31,26 +32,31 @@ func (r *UserRepository) GetUsers() []*sqlc.User {
 	return response
 }
 
-func (r *UserRepository) GetPaginatedUsers(pageable commons.Pageable) *commons.Page[dto.UserDto] {
+func (r *UserRepository) GetPaginatedUsers(pageable commons.Pageable) (*commons.Page[dto.UserDto], error) {
 	params := struct {
 		Offset int32
 		Limit  int32
 	}{Offset: int32(pageable.Offset), Limit: int32(pageable.Limit)}
 
 	var usersDto []dto.UserDto
-	users, _ := r.queries.GetPaginatedUsers(*r.ctx, params)
+	users, err := r.queries.GetPaginatedUsers(*r.ctx, params)
+	total, _ := r.queries.CountUsers(*r.ctx)
+
+	if err != nil {
+		return &commons.Page[dto.UserDto]{}, err
+	}
 
 	for _, user := range users {
 		usersDto = append(usersDto, *dto.NewUserDtoByEntity(user))
 	}
 
 	response := commons.Page[dto.UserDto]{
-		Total:    len(users),
+		Total:    int(total),
 		Content:  usersDto,
 		Pageable: &pageable,
 	}
 
-	return &response
+	return &response, nil
 }
 
 func (r *UserRepository) GetUserById(id string) (*sqlc.User, error) {
@@ -156,4 +162,24 @@ func (r *UserRepository) ExistsUserByEmail(id *string, email *string) (bool, err
 	}
 
 	return result != nil, nil
+}
+
+func (r *UserRepository) CountUsers() (int64, error) {
+	result, err := r.queries.CountUsers(*r.ctx)
+
+	if err != nil {
+		return result, err
+	}
+
+	return result, nil
+}
+
+func (r *UserRepository) DeleteUser(id *string) error {
+	err := r.queries.DeleteUser(*r.ctx, *id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

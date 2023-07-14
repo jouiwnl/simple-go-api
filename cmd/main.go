@@ -1,16 +1,13 @@
 package main
 
 import (
-	"context"
 	"database/sql"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"github.com/jouiwnl/simple-go-api/internal/config/database/sqlc"
-	"github.com/jouiwnl/simple-go-api/internal/factory"
-	userUseCases "github.com/jouiwnl/simple-go-api/internal/user/usecases"
-	_ "github.com/lib/pq"
+	"github.com/jouiwnl/simple-go-api/internal/config/server"
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 func init() {
@@ -31,24 +28,11 @@ func main() {
 		panic(err.Error())
 	}
 
-	queries := *sqlc.New(dbcon)
-	ctx := context.Background()
+	webServer := server.SetupRouter(dbcon)
 
-	repositoryFactory := factory.NewRepositoryFactory(dbcon, queries, ctx)
+	err = webServer.Run()
 
-	userRepository := repositoryFactory.NewUserRepository()
-
-	getAllUsersUseCase := userUseCases.NewGetAllUsersUseCase(userRepository)
-	getUserByIdUseCase := userUseCases.NewGetUserByIdUseCase(userRepository)
-	createUserUseCase := userUseCases.NewCreateUserUseCase(userRepository)
-	updateUserUseCase := userUseCases.NewUpdateUserUseCase(userRepository)
-
-	server := gin.Default()
-
-	server.GET("/users/:id", getUserByIdUseCase.GetUserById)
-	server.GET("/users", getAllUsersUseCase.GetPaginatedUsers)
-	server.POST("/users", createUserUseCase.CreateUser)
-	server.PUT("/users/:id", updateUserUseCase.UpdateUser)
-
-	server.Run()
+	if err != nil {
+		panic(err.Error())
+	}
 }

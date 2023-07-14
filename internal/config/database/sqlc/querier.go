@@ -9,7 +9,9 @@ import (
 )
 
 type Querier interface {
+	CountUsers(ctx context.Context) (int64, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) error
+	DeleteUser(ctx context.Context, id string) error
 	ExistsUserByCpf(ctx context.Context, arg ExistsUserByCpfParams) (*User, error)
 	ExistsUserByEmail(ctx context.Context, arg ExistsUserByEmailParams) (*User, error)
 	GetPaginatedUsers(ctx context.Context, arg GetPaginatedUsersParams) ([]*User, error)

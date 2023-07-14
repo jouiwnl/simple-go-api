@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"database/sql"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jouiwnl/simple-go-api/internal/application/utils"
 	"github.com/jouiwnl/simple-go-api/internal/user/dto"
@@ -17,32 +19,17 @@ func NewGetUserByIdUseCase(userRepository *repository.UserRepository) *GetUserBy
 	}
 }
 
-func (u *GetUserByIdUseCase) GetUserById(c *gin.Context) {
+func (u *GetUserByIdUseCase) Execute(c *gin.Context) {
 	id := c.Param("id")
 
 	response, err := u.userRepository.GetUserById(id)
 
-	if err != nil {
+	switch err {
+	case sql.ErrNoRows:
+		utils.WriteNotFoundErrorResponse(c)
+	case nil:
+		c.JSON(200, dto.NewUserDtoByEntity(response))
+	default:
 		utils.WriteInternalErrorResponse(c, err.Error())
 	}
-
-	c.JSON(200, dto.NewUserDtoByEntity(response))
 }
-
-/*func GetUserById(c *gin.Context) {
-	id := c.Param("id")
-
-	dbContext := initializers.Database.Where("id = ?", id)
-
-	response, err := repository.FindOne[models.User](dbContext)
-
-	if err != nil {
-		c.JSON(404, gin.H{
-			"statusCode": 404,
-			"message":    err.Error(),
-		})
-		return
-	}
-
-	c.JSON(200, response)
-}*/

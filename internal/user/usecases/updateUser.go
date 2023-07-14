@@ -19,7 +19,7 @@ func NewUpdateUserUseCase(userRepository *repository.UserRepository) *UpdateUser
 	}
 }
 
-func (u *UpdateUserUseCase) UpdateUser(c *gin.Context) {
+func (u *UpdateUserUseCase) Execute(c *gin.Context) {
 	id := c.Param("id")
 
 	user := &dto.UserDto{}
@@ -49,24 +49,3 @@ func (u *UpdateUserUseCase) UpdateUser(c *gin.Context) {
 
 	c.JSON(200, gin.H{"id": updated})
 }
-
-/*func UpdateUser(c *gin.Context) {
-	id := c.Param("id")
-
-	user := models.User{}
-	c.BindJSON(&user)
-
-	database := initializers.Database
-
-	errors := specificationHelper.RunSpecs[models.User](user, userSpecifications.GetSpecs(database))
-
-	if len(errors) > 0 {
-		c.JSON(422, gin.H{
-			"message": "Erro ao processar entidade",
-			"errors":  errors,
-		})
-		return
-	}
-
-	c.JSON(200, repository.Save[models.User](user, id, database))
-}*/

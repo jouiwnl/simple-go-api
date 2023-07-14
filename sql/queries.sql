@@ -1,6 +1,9 @@
 -- name: GetUsers :many
 SELECT * FROM users;
 
+-- name: CountUsers :one
+SELECT count(*) FROM users;
+
 -- name: GetPaginatedUsers :many
 SELECT * FROM users offset $1 limit $2;
 
@@ -18,3 +21,6 @@ insert into users(id, name, email, cpf, created_at) values ($1, $2, $3, $4, $5);
 
 -- name: UpdateUser :exec
 update users set name = $1, email = $2, cpf = $3, updated_at = $4 where id = $5;
+
+-- name: DeleteUser :exec
+delete from users where id = $1;

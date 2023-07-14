@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"github.com/jouiwnl/simple-go-api/internal/config/database/sqlc"
 	"time"
+
+	"github.com/jouiwnl/simple-go-api/internal/config/database/sqlc"
 )
 
 type UserDto struct {
@@ -11,7 +12,7 @@ type UserDto struct {
 	Email     *string    `json:"email"`
 	Cpf       *string    `json:"cpf"`
 	CreatedAt *time.Time `json:"createdAt"`
-	UpdatedAt *time.Time `json:"updatedAt"`
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
 
 func NewUserDtoByEntity(user *sqlc.User) *UserDto {
